@@ -1,11 +1,11 @@
 {
-  "name": "@gruppe-adler/nodebb-plugin-sso-steam-v2",
+  "name": "nodebb-plugin-sso-steam",
   "version": "2.0.4",
-  "description": "NodeBB Steam SSO refactor",
+  "description": "NodeBB Steam SSO",
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gruppe-adler/nodebb-plugin-sso-steam-v2"
+    "url": "https://github.com/chelog/nodebb-plugin-sso-steam"
   },
   "keywords": [
     "nodebb",
@@ -24,12 +24,11 @@
   "bugs": {
     "url": "https://github.com/SuperiorServers/nodebb-plugin-sso-steam-v2"
   },
-  "readme": "",
   "readmeFilename": "README.md",
   "dependencies": {
-    "passport-steam": "~1.0.14"
+    "passport-steam": "~1.0.17"
   },
   "nbbpm": {
-    "compatibility": "^1.11.0"
+    "compatibility": "^2.8.1"
   }
 }
