@@ -1,0 +1,5 @@
+{
+	"api-key": "API key",
+	"api-key-hint": "Get Steam web API key from",
+	"invalid-username": "Invalid username! Your username can only contain alphanumeric letters (a-z, numbers, spaces)."
+}

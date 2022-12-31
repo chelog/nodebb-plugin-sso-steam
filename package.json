@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-sso-steam",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "NodeBB Steam SSO",
   "main": "library.js",
   "repository": {

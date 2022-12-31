@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 const user = require.main.require('./src/user/index'),
 	db = require.main.require('./src/database/index'),
@@ -8,38 +8,36 @@ const user = require.main.require('./src/user/index'),
 	passportSteam = require('passport-steam').Strategy,
 	utils = require.main.require('./src/utils'),
 	authenticationController = require.main.require('./src/controllers/authentication'),
-	winston = require.main.require('winston');
+	routeHelpers = require.main.require('./src/routes/helpers')
 
-const constants = Object.freeze({
+	const constants = Object.freeze({
 	'name': 'Steam',
 	'admin': {
 		'route': '/plugins/sso-steam',
 		'icon': 'fa-steam'
 	}
-});
+})
 
-const Steam = {};
+const Steam = {}
 
 function profileurl(steamid) {
-	return 'https://steamcommunity.com/profiles/' + steamid;
+	return 'https://steamcommunity.com/profiles/' + steamid
 }
 
-Steam.init = function(data, callback) {
-	function render(req, res, next) {
-		res.render('admin/plugins/sso-steam', {});
-	}
-	data.router.get('/admin/plugins/sso-steam', data.middleware.admin.buildHeader, render);
-	data.router.get('/api/admin/plugins/sso-steam', render);
-	callback();
-};
+Steam.init = function({ router, middleware }, callback) {
+	routeHelpers.setupAdminPageRoute(router, '/admin/plugins/sso-steam', [], (req, res, next) =>
+		res.render('admin/plugins/sso-steam', {}))
+
+	callback()
+}
 
 Steam.linkAccount = function (uid, steamid) {
-	user.setUserField(uid, 'steam-sso:steamid', steamid);
-	user.setUserField(uid, 'steam-sso:profile', profileurl(steamid));
+	user.setUserField(uid, 'steam-sso:steamid', steamid)
+	user.setUserField(uid, 'steam-sso:profile', profileurl(steamid))
 
-	db.setObjectField('steam-sso:uid-link', steamid, uid);
-	db.setObjectField('steam-sso:steamid-link', uid, steamid);
-};
+	db.setObjectField('steam-sso:uid-link', steamid, uid)
+	db.setObjectField('steam-sso:steamid-link', uid, steamid)
+}
 
 Steam.getStrategy = function (strategies, callback) {
 	meta.settings.get('sso-steam', function(err, settings) {
@@ -55,20 +53,20 @@ Steam.getStrategy = function (strategies, callback) {
 
 				function (req, identifier, profile, done) {
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
-						Steam.linkAccount(req.user.uid, profile.id);
-						return done(null, req.user);
+						Steam.linkAccount(req.user.uid, profile.id)
+						return done(null, req.user)
 					}
 
 					Steam.login(profile.id, profile.displayName, profile._json.avatarfull, function(err, user) {
 						if (err) {
-							return done(new Error(err));
+							return done(new Error(err))
 						}
 
-						authenticationController.onSuccessfulLogin(req, user.uid);
-						done(null, user);
-					});
+						authenticationController.onSuccessfulLogin(req, user.uid)
+						done(null, user)
+					})
 				})
-			);
+			)
 
 			strategies.push({
 				name: 'steam',
@@ -77,19 +75,19 @@ Steam.getStrategy = function (strategies, callback) {
 				checkState: false,
 				icon: constants.admin.icon,
 				scope: 'user:username'
-			});
+			})
 		}
 
-		callback(null, strategies);
-	});
-};
+		callback(null, strategies)
+	})
+}
 
 
 
 Steam.getAssociation = function (data, callback) {
 	Steam.getSteamidByUid(data.uid, function (err, steamid) {
 		if (err) {
-			return callback(err, data);
+			return callback(err, data)
 		}
 
 		if (steamid) {
@@ -99,105 +97,110 @@ Steam.getAssociation = function (data, callback) {
 				steamid: steamid,
 				name: constants.name,
 				icon: constants.admin.icon
-			});
+			})
 		} else {
 			data.associations.push({
 				associated: false,
 				url: nbbUrl + '/auth/steam',
 				name: constants.name,
 				icon: constants.admin.icon
-			});
+			})
 		}
 
-		callback(null, data);
+		callback(null, data)
 	})
-};
+}
 
 Steam.login = function(steamid, username, avatar, callback) {
 	Steam.getUidBySteamid(steamid, function(err, uid) {
 		if (err) {
-			return callback(err);
+			return callback(err)
 		}
 
-		if (uid !== null) { // Existing User
+		if (uid !== null) {
+			// existing User
+
 			callback(null, {
 				uid: uid
-			});
-		} else {// New User
+			})
+		} else {
+			// new user
+
 			if (!utils.isUserNameValid(username)) {
-				return callback('Invalid username! Your username can only contain alphanumeric letters (a-z, numbers, spaces).');
+				return callback('[[sso-steam:invalid-username]]')
 			}
 
 			user.create({username: username}, function(err, uid) {
 				if (err !== null) {
-					callback(err);
+					callback(err)
 				} else {
-					Steam.linkAccount(uid, steamid);
+					Steam.linkAccount(uid, steamid)
 
-					user.setUserField(uid, 'picture', avatar);
+					user.setUserField(uid, 'picture', avatar)
 
 					callback(null, {
 						uid: uid
-					});
+					})
 				}
-			});
+			})
 		}
-	});
-};
+	})
+}
 
 Steam.getUidBySteamid = function(steamid, callback) {
 	db.getObjectField('steam-sso:uid-link', steamid, function(err, uid) {
 		if (err !== null) {
-			return callback(err);
+			return callback(err)
 		}
-		callback(null, uid);
-	});
-};
+		callback(null, uid)
+	})
+}
 
 Steam.getSteamidByUid = function(uid, callback) {
 	db.getObjectField('steam-sso:steamid-link', uid, function(err, steamid) {
 		if (err !== null) {
-			return callback(err);
+			return callback(err)
 		}
-		callback(null, steamid);
-	});
-};
+		callback(null, steamid)
+	})
+}
 
 Steam.deleteUserData = function (data, callback) {
-	const uid = data.uid;
+	const uid = data.uid
 	Steam.getSteamidByUid(uid, function (err, steamid) {
 		if (err !== null) {
-			return callback(err);
+			return callback(err)
 		}
 
 		user.auth.revokeAllSessions(uid, function() {
-			db.deleteObjectField('steam-sso:uid-link', steamid);
-			db.deleteObjectField('steam-sso:steamid-link', uid);
+			db.deleteObjectField('steam-sso:uid-link', steamid)
+			db.deleteObjectField('steam-sso:steamid-link', uid)
 
-			callback(null, uid);
-		});
-	});
-};
+			callback(null, uid)
+		})
+	})
+}
 
 Steam.addMenuItem = function(custom_header, callback) {
 	custom_header.authentication.push({
 		'route': constants.admin.route,
 		'icon': constants.admin.icon,
 		'name': constants.name
-	});
+	})
 
-	callback(null, custom_header);
-};
+	callback(null, custom_header)
+}
 
 // Add some APIs for themes to use
 Steam.addPostUserData = function (data, callback) {
 	Steam.getSteamidByUid(data.uid, function (err, steamid) {
 		if ((err == null) && (steamid !== null)) {
-			data['steam-sso:steamid'] = steamid;
-			data['steam-sso:profile'] = profileurl(steamid);
+			data['steam-sso:steamid'] = steamid
+			data['steam-sso:profile'] = profileurl(steamid)
 		}
-		callback(null, data);
-	})
-};
 
-module.exports = Steam;
+		callback(null, data)
+	})
+}
+
+module.exports = Steam

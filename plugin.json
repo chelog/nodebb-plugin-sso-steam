@@ -3,6 +3,7 @@
 	"name": "NodeBB SSO Steam",
 	"description": "Plugin that allows users to login/register via their Steam account.",
 	"url": "https://github.com/chelog/nodebb-plugin-sso-steam",
+	"defaultLang": "en-US",
 	"library": "./library.js",
 	"hooks": [
 		{ "hook": "filter:auth.init", "method": "getStrategy" },
@@ -13,7 +14,11 @@
 		{ "hook": "filter:posts.modifyUserInfo", "method": "addPostUserData" }
 	],
 	"templates": "./templates",
+	"languages": "./languages",
 	"acpScripts": [
 		"static/lib/admin.js"
-	]
+	],
+	"modules": {
+		"../admin/plugins/sso-steam.js": "./static/lib/admin.js"
+	}
 }
