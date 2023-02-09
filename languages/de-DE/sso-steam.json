@@ -1,5 +1,6 @@
 {
 	"api-key": "API Schlüssel",
 	"api-key-hint": "Steam Web-API-Schlüssel abrufen von",
-	"invalid-username": "Ungültiger Benutzername! Der Benutzername darf nur alphanumerische Buchstaben (a-z, Zahlen, Leerzeichen) enthalten."
+	"invalid-username": "Ungültiger Benutzername! Der Benutzername darf nur alphanumerische Buchstaben (a-z, Zahlen, Leerzeichen) enthalten.",
+	"steamid-taken": "Dieses Steam-Konto wird bereits von einem bestehenden Benutzer verwendet"
 }

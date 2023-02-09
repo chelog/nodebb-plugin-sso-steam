@@ -53,8 +53,14 @@ Steam.getStrategy = function (strategies, callback) {
 
 				function (req, identifier, profile, done) {
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
-						Steam.linkAccount(req.user.uid, profile.id)
-						return done(null, req.user)
+						Steam.getUidBySteamid(profile.id, function(err, uid) {
+							if (uid) {
+								return callback('[[sso-steam:steamid-taken]]')
+							}
+
+							Steam.linkAccount(req.user.uid, profile.id)
+							done(null, req.user)
+						})
 					}
 
 					Steam.login(profile.id, profile.displayName, profile._json.avatarfull, function(err, user) {
@@ -117,7 +123,7 @@ Steam.login = function(steamid, username, avatar, callback) {
 			return callback(err)
 		}
 
-		if (uid !== null) {
+		if (uid && uid !== null) {
 			// existing User
 
 			callback(null, {
@@ -130,18 +136,15 @@ Steam.login = function(steamid, username, avatar, callback) {
 				return callback('[[sso-steam:invalid-username]]')
 			}
 
-			user.create({username: username}, function(err, uid) {
+			user.create({ username }, function(err, uid) {
 				if (err !== null) {
 					callback(err)
-				} else {
-					Steam.linkAccount(uid, steamid)
-
-					user.setUserField(uid, 'picture', avatar)
-
-					callback(null, {
-						uid: uid
-					})
 				}
+
+				Steam.linkAccount(uid, steamid)
+				user.setUserField(uid, 'picture', avatar)
+
+				callback(null, { uid })
 			})
 		}
 	})
@@ -152,6 +155,7 @@ Steam.getUidBySteamid = function(steamid, callback) {
 		if (err !== null) {
 			return callback(err)
 		}
+
 		callback(null, uid)
 	})
 }
@@ -161,6 +165,7 @@ Steam.getSteamidByUid = function(uid, callback) {
 		if (err !== null) {
 			return callback(err)
 		}
+
 		callback(null, steamid)
 	})
 }
