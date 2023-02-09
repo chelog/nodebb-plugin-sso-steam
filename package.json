@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-sso-steam",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "NodeBB Steam SSO",
   "main": "library.js",
   "repository": {
@@ -21,14 +21,11 @@
     "email": "admin@kbve.com"
   },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/SuperiorServers/nodebb-plugin-sso-steam-v2"
-  },
   "readmeFilename": "README.md",
   "dependencies": {
     "passport-steam": "~1.0.17"
   },
   "nbbpm": {
-    "compatibility": "^2.8.1"
+    "compatibility": "^2.8.6"
   }
 }
